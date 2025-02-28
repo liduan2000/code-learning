@@ -5,3 +5,4 @@ ColumnLimit: 120
 AllowShortLoopsOnASingleLine: true
 AllowShortBlocksOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: true
+AlwaysBreakTemplateDeclarations: Yes

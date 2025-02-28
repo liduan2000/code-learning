@@ -1,4 +1,5 @@
 #include <atomic>
+#include <cmath>
 #include <deque>
 #include <functional>
 #include <iostream>
@@ -23,7 +24,8 @@ typedef struct Student {
     std::string name;
 } Stu;
 
-template <typename T> class Person {
+template <typename T>
+class Person {
   public:
     Person(T age) : age_(age) { printf("init\n"); }
     ~Person() { printf("destroy\n"); }
@@ -93,7 +95,8 @@ void useAtomic() {
     for (int i = 0; i < 10; i++) { std::cout << buckets_[i]; }
 }
 
-template <typename T> class SharedPtr {
+template <typename T>
+class SharedPtr {
   public:
     explicit SharedPtr(T* p = nullptr) : ptr_(p), refCnt_(new int(1)) {}
 
@@ -131,7 +134,8 @@ template <typename T> class SharedPtr {
     }
 };
 
-template <typename T> class UniquePtr {
+template <typename T>
+class UniquePtr {
   public:
     explicit UniquePtr(T* ptr = nullptr) : ptr_(ptr) {}
 
@@ -175,7 +179,10 @@ void process(int& x) { std::cout << "lvalue" << std::endl; }
 
 void process(int&& x) { std::cout << "rvalue" << std::endl; }
 
-template <typename T> void forwarder(T&& x) { process(std::forward<T>(x)); }
+template <typename T>
+void forwarder(T&& x) {
+    process(std::forward<T>(x));
+}
 
 // multithreading
 void multithreading() {
@@ -229,7 +236,8 @@ void constOverload() {
 }
 
 // CRTP
-template <typename Derived> class Base {
+template <typename Derived>
+class Base {
   public:
     void interface() { static_cast<Derived*>(this)->implementation(); }
 
@@ -272,8 +280,6 @@ int main() {
     // multithreading();
 
     // constOverload();
-
-    CRTP();
 
     return 0;
 }
