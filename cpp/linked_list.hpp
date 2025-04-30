@@ -1,15 +1,14 @@
 #include <iostream>
+#include <string>
 
 #include "node.hpp"
-
-using namespace std;
 
 class LinkedList {
   public:
     // create Linked List
     ListNode* createList() {
-        string s_val;
-        cin >> s_val;
+        std::string s_val;
+        std::cin >> s_val;
         if (s_val == "#") return nullptr;
         ListNode* node = new ListNode(stoi(s_val));
         node->next = createList();
@@ -44,10 +43,10 @@ class LinkedList {
     // traverse the Linked List
     void traverseList(ListNode* head) {
         while (head) {
-            cout << head->val << " ";
+            std::cout << head->val << " ";
             head = head->next;
         }
-        cout << endl;
+        std::cout << std::endl;
     }
 
     // delete the Linked List
