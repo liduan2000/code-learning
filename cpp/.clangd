@@ -1,2 +1,5 @@
 CompileFlags:
   Add: [-std=c++23]
+
+Hover:
+  ShowAKA: Yes
