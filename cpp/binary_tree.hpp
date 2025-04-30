@@ -14,36 +14,36 @@ class BinaryTree {
     TreeNode* createTree() {
         std::string s;
         std::cin >> s;
-        if (s == "#") return nullptr;
+        if (s == "#") { return nullptr; }
         TreeNode* node = new TreeNode(stoi(s));
         node->left = createTree();
         node->right = createTree();
         return node;
     }
 
-    void recursivePreorderTraversal(TreeNode* root) {
-        if (!root) return;
+    void preorderTraversalR(TreeNode* root) {
+        if (!root) { return; }
         std::cout << root->val << " ";
-        recursivePreorderTraversal(root->left);
-        recursivePreorderTraversal(root->right);
+        preorderTraversalR(root->left);
+        preorderTraversalR(root->right);
     }
 
-    void recursiveInorderTraversal(TreeNode* root) {
-        if (!root) return;
-        recursiveInorderTraversal(root->left);
+    void inorderTraversalR(TreeNode* root) {
+        if (!root) { return; }
+        inorderTraversalR(root->left);
         std::cout << root->val << " ";
-        recursiveInorderTraversal(root->right);
+        inorderTraversalR(root->right);
     }
 
-    void recursivePostorderTraversal(TreeNode* root) {
-        if (!root) return;
-        recursivePostorderTraversal(root->left);
-        recursivePostorderTraversal(root->right);
+    void postorderTraversalR(TreeNode* root) {
+        if (!root) { return; }
+        postorderTraversalR(root->left);
+        postorderTraversalR(root->right);
         std::cout << root->val << " ";
     }
 
-    void iterativePreorderTraversal(TreeNode* root) {
-        if (!root) return;
+    void preorderTraversalI(TreeNode* root) {
+        if (!root) { return; }
         std::stack<TreeNode*> st;
         st.push(root);
         while (!st.empty()) {
@@ -56,8 +56,8 @@ class BinaryTree {
         std::cout << std::endl;
     }
 
-    void iterativeInorderTraversal(TreeNode* root) {
-        if (!root) return;
+    void inorderTraversalI(TreeNode* root) {
+        if (!root) { return; }
         std::stack<TreeNode*> st;
         TreeNode* cur = root;
         while (cur || !st.empty()) {
@@ -74,8 +74,8 @@ class BinaryTree {
         std::cout << std::endl;
     }
 
-    void iterativePostorderTraversal(TreeNode* root) {
-        if (!root) return;
+    void postorderTraversalI(TreeNode* root) {
+        if (!root) { return; }
         std::stack<TreeNode*> st;
         st.push(root);
         std::vector<int> nums;
@@ -92,7 +92,7 @@ class BinaryTree {
     }
 
     void levelorderTraversal(TreeNode* root) {
-        if (!root) return;
+        if (!root) { return; }
         std::queue<TreeNode*> q;
         q.push(root);
         while (!q.empty()) {
@@ -109,7 +109,7 @@ class BinaryTree {
     }
 
     void deleteTree(TreeNode* root) {
-        if (!root) return;
+        if (!root) { return; }
         deleteTree(root->left);
         deleteTree(root->right);
         delete root;

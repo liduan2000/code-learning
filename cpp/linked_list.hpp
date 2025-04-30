@@ -9,7 +9,7 @@ class LinkedList {
     ListNode* createList() {
         std::string s_val;
         std::cin >> s_val;
-        if (s_val == "#") return nullptr;
+        if (s_val == "#") { return nullptr; }
         ListNode* node = new ListNode(stoi(s_val));
         node->next = createList();
         return node;
