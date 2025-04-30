@@ -225,14 +225,14 @@ class A {
 };
 
 void constOverload() {
-    A a1;
-    a1.func(1);
+    A a;
+    a.func(1);
     int x = 2;
-    a1.func(x);
-    a1.count();
+    a.func(x);
+    a.count();
 
-    const A a2;
-    a2.count();
+    const A ca;
+    ca.count();
 }
 
 // CRTP
