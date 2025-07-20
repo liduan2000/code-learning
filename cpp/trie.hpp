@@ -7,6 +7,8 @@ class Trie {
   public:
     Trie() { root = new Node(); }
 
+    ~Trie() { clear(root); }
+
     void insert(const std::string& word) {
         Node* node = root;
         for (char c : word) {
@@ -41,6 +43,11 @@ class Trie {
 
         Node() : isEnd(false) {}
     };
+
+    void clear(Node* node) {
+        for (auto& [_, child] : node->children) { clear(child); }
+        delete node;
+    }
 
     Node* root;
 };
