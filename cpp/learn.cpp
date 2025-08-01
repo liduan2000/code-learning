@@ -98,40 +98,64 @@ void useAtomic() {
 template <typename T>
 class SharedPtr {
   public:
-    explicit SharedPtr(T* p = nullptr) : ptr_(p), refCnt_(new int(1)) {}
+    SharedPtr() : ptr_(nullptr), cnt_(nullptr) {}
 
-    SharedPtr(const SharedPtr& other) : ptr_(other.ptr_), refCnt_(other.refCnt_) { (*refCnt_)++; }
+    explicit SharedPtr(T* ptr) : ptr_(ptr), cnt_(ptr_ ? new std::atomic<size_t>(1) : nullptr) {}
 
-    int useCount() const { return *ptr_; }
+    ~SharedPtr() { release(); }
+
+    SharedPtr(const SharedPtr& other) : ptr_(other.ptr_), cnt_(other.cnt_) {
+        if (cnt_) { cnt_->fetch_add(1); }
+    }
+
+    SharedPtr(SharedPtr&& other) : ptr_(other.ptr_), cnt_(other.cnt_) {
+        other.ptr_ = nullptr;
+        other.cnt_ = nullptr;
+    }
 
     SharedPtr& operator=(const SharedPtr& other) {
         if (this != &other) {
             release();
             ptr_ = other.ptr_;
-            refCnt_ = other.refCnt_;
-            (*refCnt_)++;
+            cnt_ = other.cnt_;
+            if (cnt_) { cnt_->fetch_add(1); }
         }
         return *this;
     }
 
-    T& operator*() const { return *ptr_; }
+    SharedPtr& operator=(SharedPtr&& other) {
+        if (this != &other) {
+            release();
+            ptr_ = other.ptr_;
+            cnt_ = other.cnt_;
+            other.ptr_ = nullptr;
+            other.cnt_ = nullptr;
+        }
+        return *this;
+    }
 
-    T* operator->() const { return ptr_; }
+    T& operator*() { return *ptr_; }
 
-    ~SharedPtr() { release(); }
+    T* operator->() { return ptr_; }
+
+    T* get() const { return ptr_; }
+
+    size_t useCount() const { return cnt_ ? cnt_->load() : 0UL; }
 
   private:
-    T* ptr_;
-    int* refCnt_;
-
     void release() {
-        if (--(*refCnt_) == 0) {
-            delete ptr_;
-            delete refCnt_;
-            ptr_ = nullptr;
-            refCnt_ = nullptr;
+        if (cnt_) {
+            if (cnt_->fetch_sub(1) == 0) {
+                delete ptr_;
+                delete cnt_;
+                ptr_ = nullptr;
+                cnt_ = nullptr;
+            }
         }
     }
+
+    T* ptr_;
+    std::atomic<size_t>* cnt_;
 };
 
 template <typename T>
