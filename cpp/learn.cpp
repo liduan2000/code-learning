@@ -98,9 +98,7 @@ void useAtomic() {
 template <typename T>
 class SharedPtr {
   public:
-    SharedPtr() : ptr_(nullptr), cnt_(nullptr) {}
-
-    explicit SharedPtr(T* ptr) : ptr_(ptr), cnt_(ptr_ ? new std::atomic<size_t>(1) : nullptr) {}
+    explicit SharedPtr(T* ptr = nullptr) : ptr_(ptr), cnt_(ptr_ ? new std::atomic<size_t>(1) : nullptr) {}
 
     ~SharedPtr() { release(); }
 
@@ -148,8 +146,6 @@ class SharedPtr {
             if (cnt_->fetch_sub(1) == 0) {
                 delete ptr_;
                 delete cnt_;
-                ptr_ = nullptr;
-                cnt_ = nullptr;
             }
         }
     }
@@ -163,12 +159,14 @@ class UniquePtr {
   public:
     explicit UniquePtr(T* ptr = nullptr) : ptr_(ptr) {}
 
+    ~UniquePtr() { delete ptr_; }
+
     UniquePtr(const UniquePtr&) = delete;
     UniquePtr& operator=(const UniquePtr&) = delete;
 
-    UniquePtr(const UniquePtr&& other) noexcept : ptr_(other.ptr_) { other.ptr_ = nullptr; }
+    UniquePtr(UniquePtr&& other) noexcept : ptr_(other.ptr_) { other.ptr_ = nullptr; }
 
-    UniquePtr& operator=(const UniquePtr&& other) noexcept {
+    UniquePtr& operator=(UniquePtr&& other) noexcept {
         if (this != &other) {
             delete ptr_;
             ptr_ = other.ptr_;
@@ -178,21 +176,23 @@ class UniquePtr {
     }
 
     T& operator*() const { return *ptr_; }
+
     T* operator->() const { return ptr_; }
-    T* get() const { return ptr_; }
+
+    T* get() { return ptr_; }
 
     T* release() {
-        T* temp = ptr_;
+        T* tmp = ptr_;
         ptr_ = nullptr;
-        return temp;
+        return tmp;
     }
 
     void reset(T* ptr = nullptr) {
-        delete ptr_;
-        ptr_ = ptr;
+        if (ptr_ != ptr) {
+            delete ptr_;
+            ptr_ = ptr;
+        }
     }
-
-    ~UniquePtr() { delete ptr_; }
 
   private:
     T* ptr_;
