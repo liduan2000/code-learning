@@ -7,8 +7,8 @@
 template <typename T, typename Compare = std::less<T>>
 class PriorityQueue {
   public:
-    void push(T data) {
-        heap_.push_back(data);
+    void push(const T& val) {
+        heap_.push_back(val);
         shiftUp(heap_.size() - 1);
     }
 
@@ -19,14 +19,14 @@ class PriorityQueue {
         shiftDown(0);
     }
 
-    T top() {
+    T top() const {
         if (empty()) { throw std::runtime_error("PriorityQueue is empty"); }
         return heap_[0];
     }
 
-    bool empty() { return heap_.empty(); }
+    bool empty() const { return heap_.empty(); }
 
-    size_t size() { return heap_.size(); }
+    size_t size() const { return heap_.size(); }
 
   private:
     std::vector<T> heap_;
@@ -42,16 +42,16 @@ class PriorityQueue {
     }
 
     void shiftDown(int idx) {
-        int n = heap_.size();
+        int n = size();
         while (idx * 2 + 1 < n) {
             int leftChild = idx * 2 + 1;
             int rightChild = idx * 2 + 2;
-            int smallest = idx;
-            if (leftChild < n && !comp_(heap_[leftChild], heap_[smallest])) { smallest = leftChild; }
-            if (rightChild < n && !comp_(heap_[rightChild], heap_[smallest])) { smallest = rightChild; }
-            if (smallest == idx) { break; }
-            std::swap(heap_[idx], heap_[smallest]);
-            idx = smallest;
+            int highest = idx;
+            if (leftChild < n && !comp_(heap_[leftChild], heap_[highest])) { highest = leftChild; }
+            if (rightChild < n && !comp_(heap_[rightChild], heap_[highest])) { highest = rightChild; }
+            if (highest == idx) { break; }
+            std::swap(heap_[idx], heap_[highest]);
+            idx = highest;
         }
     }
 };
