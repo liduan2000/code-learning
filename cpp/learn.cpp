@@ -106,11 +106,6 @@ class SharedPtr {
         if (cnt_) { cnt_->fetch_add(1); }
     }
 
-    SharedPtr(SharedPtr&& other) : ptr_(other.ptr_), cnt_(other.cnt_) {
-        other.ptr_ = nullptr;
-        other.cnt_ = nullptr;
-    }
-
     SharedPtr& operator=(const SharedPtr& other) {
         if (this != &other) {
             release();
@@ -121,7 +116,12 @@ class SharedPtr {
         return *this;
     }
 
-    SharedPtr& operator=(SharedPtr&& other) {
+    SharedPtr(SharedPtr&& other) noexcept : ptr_(other.ptr_), cnt_(other.cnt_) {
+        other.ptr_ = nullptr;
+        other.cnt_ = nullptr;
+    }
+
+    SharedPtr& operator=(SharedPtr&& other) noexcept {
         if (this != &other) {
             release();
             ptr_ = other.ptr_;
@@ -132,22 +132,23 @@ class SharedPtr {
         return *this;
     }
 
-    T& operator*() { return *ptr_; }
+    T& operator*() const { return *ptr_; }
 
-    T* operator->() { return ptr_; }
+    T* operator->() const noexcept { return ptr_; }
 
-    T* get() const { return ptr_; }
+    T* get() const noexcept { return ptr_; }
 
-    size_t useCount() const { return cnt_ ? cnt_->load() : 0UL; }
+    size_t useCount() const noexcept { return cnt_ ? cnt_->load() : 0; }
 
   private:
     void release() {
-        if (cnt_) {
-            if (cnt_->fetch_sub(1) == 0) {
-                delete ptr_;
-                delete cnt_;
-            }
+        if (!cnt_) { return; }
+        if (cnt_->fetch_sub(1) == 1) {
+            delete ptr_;
+            delete cnt_;
         }
+        ptr_ = nullptr;
+        cnt_ = nullptr;
     }
 
     T* ptr_;
@@ -162,6 +163,7 @@ class UniquePtr {
     ~UniquePtr() { delete ptr_; }
 
     UniquePtr(const UniquePtr&) = delete;
+
     UniquePtr& operator=(const UniquePtr&) = delete;
 
     UniquePtr(UniquePtr&& other) noexcept : ptr_(other.ptr_) { other.ptr_ = nullptr; }
@@ -177,17 +179,17 @@ class UniquePtr {
 
     T& operator*() const { return *ptr_; }
 
-    T* operator->() const { return ptr_; }
+    T* operator->() const noexcept { return ptr_; }
 
-    T* get() { return ptr_; }
+    T* get() const noexcept { return ptr_; }
 
-    T* release() {
+    T* release() noexcept {
         T* tmp = ptr_;
         ptr_ = nullptr;
         return tmp;
     }
 
-    void reset(T* ptr = nullptr) {
+    void reset(T* ptr = nullptr) noexcept {
         if (ptr_ != ptr) {
             delete ptr_;
             ptr_ = ptr;
