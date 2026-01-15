@@ -2,56 +2,62 @@
 
 #include <functional>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
-template <typename T, typename Compare = std::less<T>>
+template <typename T, typename Comp = std::less<T>>
 class PriorityQueue {
   public:
     void push(const T& val) {
-        heap_.push_back(val);
-        shiftUp(heap_.size() - 1);
+        data_.push_back(val);
+        shiftUp(data_.size() - 1);
+    }
+
+    template <typename... Args>
+    void emplace(Args&&... args) {
+        data_.emplace_back(std::forward<Args>(args)...);
+        shiftUp(data_.size() - 1);
     }
 
     void pop() {
         if (empty()) { throw std::runtime_error("PriorityQueue is empty"); }
-        heap_[0] = heap_.back();
-        heap_.pop_back();
-        shiftDown(0);
+        data_[0] = std::move(data_.back());
+        data_.pop_back();
+        if (!empty()) { shiftDown(0); }
     }
 
-    T top() const {
+    const T& top() const {
         if (empty()) { throw std::runtime_error("PriorityQueue is empty"); }
-        return heap_[0];
+        return data_.front();
     }
 
-    bool empty() const { return heap_.empty(); }
+    bool empty() const { return data_.empty(); }
 
-    size_t size() const { return heap_.size(); }
+    size_t size() const { return data_.size(); }
 
   private:
-    std::vector<T> heap_;
-    Compare comp_;
-
-    void shiftUp(int idx) {
+    void shiftUp(size_t idx) {
         while (idx > 0) {
-            int parent = (idx - 1) / 2;
-            if (comp_(heap_[idx], heap_[parent])) { break; }
-            std::swap(heap_[idx], heap_[parent]);
+            size_t parent = (idx - 1) >> 1;
+            if (comp_(data_[idx], data_[parent])) { break; }
+            std::swap(data_[parent], data_[idx]);
             idx = parent;
         }
     }
 
-    void shiftDown(int idx) {
-        int n = size();
+    void shiftDown(size_t idx) {
+        const size_t n = size();
         while (idx * 2 + 1 < n) {
-            int leftChild = idx * 2 + 1;
-            int rightChild = idx * 2 + 2;
-            int highest = idx;
-            if (leftChild < n && !comp_(heap_[leftChild], heap_[highest])) { highest = leftChild; }
-            if (rightChild < n && !comp_(heap_[rightChild], heap_[highest])) { highest = rightChild; }
-            if (highest == idx) { break; }
-            std::swap(heap_[idx], heap_[highest]);
-            idx = highest;
+            size_t lChild = idx * 2 + 1, rChild = idx * 2 + 2;
+            size_t best = idx;
+            if (lChild < n && comp_(data_[best], data_[lChild])) { best = lChild; }
+            if (rChild < n && comp_(data_[best], data_[rChild])) { best = rChild; }
+            if (best == idx) { break; }
+            std::swap(data_[idx], data_[best]);
+            idx = best;
         }
     }
+
+    std::vector<T> data_;
+    Comp comp_;
 };
